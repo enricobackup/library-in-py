@@ -1,2 +1,2 @@
 # library-in-py
-a library manager using py 
+a library manager using py. still working on search methods...
