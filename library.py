@@ -1,7 +1,6 @@
 import os
 import inquirer
 import time
-import datetime
 import random
 import json
 
@@ -18,7 +17,7 @@ def add_book():
   while True:
     try:
       book_name = str(input("Book name: "))
-      if any(book_list["book name"] == book_name for book in book_list):
+      if any(book_list["book name"] == book_name for book in enumerate(book_list)):
         print("Book already exists!")
         time.sleep(2)
         break
@@ -29,7 +28,7 @@ def add_book():
       book_pages = int(input("Book pages: "))
       book_genre = str(input("Book genre: "))
     except:
-      print("Woah! looks like you typeed an invalid input, please, try again")
+      print("Woah! looks like you typed an invalid input, please, try again")
       time.sleep(2)
       continue
 
@@ -54,7 +53,16 @@ def add_book():
       print("Error adding book.")
       time.sleep(2)
       break
-  
+def set_book_list(book_name):
+  print(f"Title: {book['book name']} \n"
+                  f"Author: {book_name['author']} \n"
+                  f"Genre: {book_name['genre']} \n"
+                  f"Year: {book_name['year']} \n"
+                  f"Is borrowed? {book_name['is borrowed?']} \n"
+                  f"Times borrowed: {book_name['times borrowed']} \n"
+                  f"Price: {book_name['year']} \n")
+
+
 def delete_book():
   clear_terminal()
   name_book_to_remove = str(input("Name of the book that you want to delete: "))
@@ -127,13 +135,15 @@ def create_user():
 def locate_user():
   clear_terminal()
   username = str(input("Username: "))
-  for user in enumerate(users_list):
+  for i, user in enumerate(users_list):
     if user['username'] == username:
       print(f"User {username} found!")
       print(f"Email: {user['email']} \n"
             f"Age: {user['age']} \n"
             f"Books borrowed: {user['books borrowed']} \n"
-            f"Reading at the momment: {user['book currently borrowed']}")
+            f"book currently borrowed: {user['book currently borrowed']}")
+    else:
+      print("User not found.")
       input('#')
 
 
@@ -161,75 +171,88 @@ def borrow_book():
   clear_terminal()
   username = str(input("Enter the username: "))
 
-  for i, user in enumerate(username):
+  for i, user in enumerate(users_list):
     if user["username"] == username:
-      try:
-        book_title = str(input("Enter the title of the book you want to borrow: "))
-        for i, book in enumerate(book_list):
-          if book["title"] == book_title:
-            user["books borrowed"] += book_title + ", "
-            user["book currently borrowed"] = book_title
-            book["times borrowed"] += 1
-            book["is borrowed?"] = book["is borrowed?"].replace(book["is borrowed?"], "borrowed")
-            print(f"Book {book_title} borrowed successfully!")
-            return book_list
-      except:
+      if user["book currently borrowed"] != "":
+        print("You already have a book borrowed.")
+        time.sleep(2)
+        break
+      # try:
+      book_title = str(input("Enter the title of the book you want to borrow: "))
+      for i, book in enumerate(book_list):
+        if book["book name"] == book_title:
+          user["books borrowed"] += book_title + ", "
+          user["book currently borrowed"] = book_title
+          book["times borrowed"] += 1
+          book["is borrowed?"] = book["is borrowed?"].replace(book["is borrowed?"], "borrowed")
+          print(f"Book {book_title} borrowed successfully!")
+          input("#")
+          return book_list
+      # except:
         print("Error borrowing book.")
-
+        time.sleep(2)
     else:
       print("User not found.")
+      time.sleep(2)
+
 
 def return_book():
   clear_terminal()
   username = str(input("Enter the username: "))
   for i, user in enumerate(users_list):
     if user["username"] == username:
-      book_return = input(f"You are currently with {user["book currently borrowed, would you like to return it? [Y/N]: "]}").upper()
+      book_return = input(f"You are currently with {user["book currently borrowed"]}, would you like to return it? [Y/N]: ").upper()
       if book_return == "Y":
-        user["books borrowed"] = user["books borrowed"].replace(user["book currently borrowed"], "")
+        user["book currently borrowed"] = user["book currently borrowed"].replace(user["book currently borrowed"], "")
         for x, book in enumerate(book_list):
           book["is borrowed?"] = book["is borrowed?"].replace(book["is borrowed?"], "Available")
+          time.sleep(2)
       elif book_return == "N":
         print("Action canceled")
+        time.sleep(2)
       else:
         print("Invalid input")
+        time.sleep(2)
   return book_list
 
 def search_book():
   global book
   clear_terminal()
   while True:
-    try:
-      book_title = str(input("Enter the title of the book you want to search: "))
-    except:
-      print("Invalid input, try again")
-      continue
-    
-    for book in enumerate(book_list):
-      if book["book name"] == book_title:
-        print(f"Book {book_title} found!")
-        time.sleep(1)
-        more_infos_book = input(f"Do you want to see more infos about {book_title}? [Y/N]: ").upper()
-        if more_infos_book == "Y":
-          print(f"Title: {book['title']} \n"
-                f"Author: {book['author']} \n"
-                f"Genre: {book['genre']} \n"
-                f"Year: {book['year']} \n"
-                f"Is borrowed? {book['is borrowed?']} \n"
-                f"Times borrowed: {book['times borrowed']} \n"
-                f"Price: {book['year']} \n")
-          input("#")
-        elif more_infos_book == "N":
-          print("Operation canceled")
-          break
-        else:
-          print("Invalid input")
-        continue_searching = input("Do you want to continue? searching? [Y/N]: ").upper()
-        if continue_searching == 'Y':
-          continue
-        else:
-          break
+    search_question = input("Do you want to search for a book title? [Y/N]: ").upper()
+    if search_question == "Y":
+      clear_terminal()
+      try:
+        book_title = str(input("Enter the title of the book you want to search: "))
+      except:
+        print("Invalid input, try again")
+        continue
+      
+      for i, book in enumerate(book_list):
+        if book["book name"] == book_title:
+          print(f"Book {book_title} found!")
+          time.sleep(1)
+          more_infos_book = input(f"Do you want to see more infos about {book_title}? [Y/N]: ").upper()
+          if more_infos_book == "Y":
+            clear_terminal()
 
+
+
+            set_book_list(book)
+
+
+
+            input("#")
+          elif more_infos_book == "N":
+            print("Operation canceled")
+            break
+        else:
+          print(f"Book {book_title} not found")
+          time.sleep(2)
+          break
+    else:
+      
+      break
 
 def search_books_by_attribute(book_list, attribute, search_term):
   global book
@@ -241,8 +264,10 @@ def search_books_by_attribute(book_list, attribute, search_term):
       results.append(book)
   
   for i, result in enumerate(results, start=1):
-    print(f"{i})", result)
+    set_book_list(result)
+    
     input('#')
+    break
 
 
 def save_lists():
@@ -298,7 +323,6 @@ while True:
 
   if selectionMenu == "User managment":
 
-    
     while True:
       clear_terminal()
       questionUser = [
@@ -339,6 +363,7 @@ while True:
             "Delete a book",
             "Search a book",
             "Borrow a book",
+            "Return a book",
             "Back",
           ],
         )
@@ -350,6 +375,10 @@ while True:
         add_book()    
       elif selectionBook == "Delete a book":
         delete_book()
+      elif selectionBook == "Borrow a book":
+        borrow_book()
+      elif selectionBook == "Return a book":
+        return_book()
       elif selectionBook == "Search a book":
         while True:
           clear_terminal()
@@ -387,27 +416,39 @@ while True:
               selectionSearch = answer.get("SearchBook")
 
               if selectionSearch == "By author":
+                clear_terminal()
                 author = input("Enter the author's name: ")
                 search_books_by_attribute(book_list, "author", author)
                 input("#")
 
               elif selectionSearch == "By genre":
+                clear_terminal()
                 genre = input("Enter the genre: ")
                 search_books_by_attribute(book_list, "genre", genre)
                 input("#")
 
-              elif selectionSearch == "Most borrowed":
-                sorted_books = sorted(book, key=lambda x: x["times borrowed"], reverse=True)
-                for book in sorted_books[3]:
-                  print(book)
-                  input("#")
+              elif selectionSearch == "Most borrowed":     
+                n = 3 
+                try: 
+                  sorted_books = sorted(book_list, key=lambda x: x.get("times borrowed", 0), reverse=True)
+                  for i, book in enumerate(sorted_books):           
+                    set_book_list(book)
+                    i += 1
+                    if i == 3:
+                      input("#")
+                      break
+                  
+                except:
+                  print("You must have at least 3 already borrowed books")
+                  time.sleep(2)
 
               elif selectionSearch == "Random Book":
+                clear_terminal()
                 random_book = random.choice(book_list)
-                print(random_book)
+                set_book_list(random_book)
                 input("#")
 
-              elif selectionSearch == "Exit":
+              elif selectionSearch == "Back":
                 break
 
               # else:
@@ -426,6 +467,4 @@ while True:
     save_lists()
     print("Exiting the program.")
     break #part of the menu system
-
-
 
